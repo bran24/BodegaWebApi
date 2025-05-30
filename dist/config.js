@@ -1,0 +1,15 @@
+"use strict";
+var _a, _b;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TOKEN_LIMIT = exports.SECRET_TOKEN = exports.SALT = exports.DB_PORT = exports.DB_SERVER = exports.DB_PASSWORD = exports.DB_DATABASE = exports.DB_USERNAME = exports.PORT = exports.NODE_ENV = void 0;
+require("dotenv").config();
+exports.NODE_ENV = process.env.NODE_ENV || "test";
+exports.PORT = process.env.PORT || "3006";
+exports.DB_USERNAME = process.env.DB_USERNAME || "";
+exports.DB_DATABASE = process.env.DB_DATABASE || "";
+exports.DB_PASSWORD = process.env.DB_PASSWORD || "";
+exports.DB_SERVER = process.env.DB_SERVER || "";
+exports.DB_PORT = +(process.env.DB_PORT || "3306");
+exports.SALT = +((_a = process.env.SALT) !== null && _a !== void 0 ? _a : 11);
+exports.SECRET_TOKEN = process.env.SECRET_TOKEN || "secret";
+exports.TOKEN_LIMIT = Number((_b = process.env.TOKEN_LIMIT) !== null && _b !== void 0 ? _b : "1");
