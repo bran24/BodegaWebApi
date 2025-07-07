@@ -4,7 +4,7 @@ import { DataSource } from "typeorm"
 import * as entities from "./core/entities"
 import cors from "cors";
 import { control, trim } from "./middlewares/"
-
+import "reflect-metadata";
 import {
     PORT,
     NODE_ENV,
@@ -37,6 +37,7 @@ export const AppDataSource = new DataSource({
     username: DB_USERNAME,
     password: DB_PASSWORD,
     database: DB_DATABASE,
+    migrations: [__dirname + "/core/migrations/*.{ts,js}"],
     // options: {
     //     trustServerCertificate: true
     // },

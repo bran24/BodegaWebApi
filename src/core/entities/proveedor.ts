@@ -19,15 +19,15 @@ export class Proveedor {
     nombre!: string
     @Column({ nullable: true })
     descripcion!: string
-    @Column()
+    @Column({ nullable: true })
     contacto!: string
-    @Column()
+    @Column({ nullable: true })
     email!: string
     @Column()
     telefono!: string
-    @Column()
+    @Column({ nullable: true })
     direccion!: string
-    @Column()
+    @Column({ nullable: true })
     pais!: string
     @Column({ default: true })
     isActive!: boolean;
