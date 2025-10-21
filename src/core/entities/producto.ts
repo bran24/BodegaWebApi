@@ -12,6 +12,7 @@ import {
 
 import { Unidad } from "./unidad";
 import { Categoria } from "./categoria";
+import { Proveedor } from "./proveedor";
 
 
 @Entity({ name: 'producto' })
@@ -31,6 +32,10 @@ export class Producto {
     @ManyToOne(() => Unidad, (uni) => uni.productos)
     @JoinColumn({ name: 'unidadid' })
     unidad!: Unidad;
+
+    @ManyToOne(() => Proveedor, (prov) => prov.productos, { nullable: true })
+    @JoinColumn({ name: 'proveedorid' })
+    proveedor!: Proveedor | null;
 
 
     @ManyToOne(() => Categoria, (categoria) => categoria.productos)

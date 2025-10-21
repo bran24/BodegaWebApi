@@ -7,6 +7,7 @@ import unidad from "./Unidad.route"
 import permiso from "./Permiso.route"
 import rolPermiso from "./RolPermiso.route";
 import proveedor from "./Proveedor.route"
+import cliente from "./Cliente.route"
 import { Express } from "express"
 
 
@@ -21,4 +22,5 @@ export default ({ app, version }: { app: Express; version: string }) => {
     app.use(version, permiso)
     app.use(version, rolPermiso)
     app.use(version, proveedor)
+    app.use(version,cliente)
 };

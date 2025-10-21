@@ -7,10 +7,11 @@ import { Producto } from "../core/entities/producto"
 import { createProductInteractor, deleteProductInteractor, updateProductInteractor } from '../core/interactor/producto';
 import { Categoria } from '../core/entities/categoria';
 import { Unidad } from '../core/entities/unidad';
+import { Proveedor } from '../core/entities/proveedor';
 export const createProduct = async (req: Request, res: Response): Promise<Response> => {
 
     try {
-        const { nombre, precioVenta, precioCompra, cantidad, fechaVencimiento, unidad, categoria } = req.body
+        const { nombre, precioVenta, precioCompra, cantidad, fechaVencimiento, unidad, categoria,proveedor } = req.body
 
         const existeUnidad = await AppDataSource.getRepository(Unidad).findOneBy({ id: unidad })
 
@@ -26,6 +27,8 @@ export const createProduct = async (req: Request, res: Response): Promise<Respon
 
         }
 
+         const existeProveedor = await AppDataSource.getRepository(Proveedor).findOneBy({ id: proveedor })
+
 
         const prod = new Producto();
         prod.nombre = nombre;
@@ -34,7 +37,14 @@ export const createProduct = async (req: Request, res: Response): Promise<Respon
         prod.categoria = existeCategoria;
         prod.unidad = existeUnidad;
         prod.cantidad = cantidad;
+    
         prod.fechaVencimiento = fechaVencimiento;
+
+        prod.proveedor = existeProveedor ?? null;
+
+
+
+
         const result = await createProductInteractor(prod);
 
 
@@ -62,7 +72,7 @@ export const listProduct = async (req: Request, res: Response): Promise<Response
             where: {
                 isActive: true,
             },
-            relations: ['categoria', 'unidad']
+            relations: ['categoria', 'unidad','proveedor']
 
         })
 
@@ -83,7 +93,7 @@ export const listProduct = async (req: Request, res: Response): Promise<Response
 export const updateProduct = async (req: Request, res: Response): Promise<Response> => {
 
     try {
-        const { id, nombre, precioVenta, precioCompra, cantidad, fechaVencimiento, unidad, categoria } = req.body
+        const { id, nombre, precioVenta, precioCompra, cantidad, fechaVencimiento, unidad, categoria,proveedor } = req.body
 
 
         const existeUnidad = await AppDataSource.getRepository(Unidad).findOneBy({ id: unidad })
@@ -100,6 +110,8 @@ export const updateProduct = async (req: Request, res: Response): Promise<Respon
 
         }
 
+        const existeProveedor = await AppDataSource.getRepository(Proveedor).findOneBy({ id: proveedor })
+
 
 
         const prod = new Producto()
@@ -111,6 +123,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<Respon
         prod.unidad = existeUnidad;
         prod.cantidad = cantidad;
         prod.fechaVencimiento = fechaVencimiento;
+        prod.proveedor = existeProveedor ?? null;
 
         const result = await updateProductInteractor(prod);
 
@@ -186,7 +199,7 @@ export const getPaginatedProducts = async (req: Request, res: Response) => {
         // Obtener los productos con paginación
         const [productos, totalItems] = await productRepository.findAndCount({
             where: { isActive: true }, // Filtrar solo productos activos
-            relations: ['categoria', 'unidad'], // Incluir relaciones
+            relations: ['categoria', 'unidad','proveedor'], // Incluir relaciones
             skip: offset,
             take: limit,
         });

@@ -1,3 +1,5 @@
+export { TipoDocumento } from "./tipo_documento"
+
 export { Producto } from "./producto"
 
 export { Roles } from "./roles"
@@ -11,3 +13,4 @@ export { RolPermiso } from "./rolPermisos"
 export { Permisos } from "./permisos"
 export { TipoPermisos } from "./tipoPermiso"
 export { Proveedor } from "./proveedor"
+export {Cliente} from "./clientes"

@@ -8,6 +8,7 @@ import {
     JoinColumn,
     ManyToOne
 } from "typeorm";
+import { Producto } from "./producto";
 
 
 
@@ -37,6 +38,8 @@ export class Proveedor {
     @Column()
     @UpdateDateColumn()
     fecha_actualizacion!: Date;
+    @OneToMany(() => Producto, (prod) => prod.proveedor)
+    productos!: Producto[];
 
 
 
