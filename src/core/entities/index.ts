@@ -1,4 +1,6 @@
-export { TipoDocumento } from "./tipo_documento"
+
+
+export { TipoDocumento } from "./tipoDocumento"
 
 export { Producto } from "./producto"
 
@@ -14,3 +16,8 @@ export { Permisos } from "./permisos"
 export { TipoPermisos } from "./tipoPermiso"
 export { Proveedor } from "./proveedor"
 export {Cliente} from "./clientes"
+export {Ventas} from "./venta"
+export {DetalleVenta} from "./detalleVenta"
+export{Pago} from  "./pago"
+export {MetodoPago} from "./metodoPago"
+export { TipoComprobante } from "./tipoComprobante"

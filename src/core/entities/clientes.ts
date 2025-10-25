@@ -6,9 +6,11 @@ import {
     UpdateDateColumn,
     ManyToOne,
     JoinColumn,
+    OneToMany,
 
 } from "typeorm";
-import { TipoDocumento } from "./tipo_documento";
+import { TipoDocumento } from "./tipoDocumento";
+import { Ventas } from "./venta";
 
 
 
@@ -23,6 +25,12 @@ export class Cliente {
     @ManyToOne(() => TipoDocumento, (tipo) => tipo.clientes)
     @JoinColumn({ name: 'tipo_documento_id' })
     tipo_documento!: TipoDocumento | null;
+
+    @OneToMany(()=>Ventas,(vent)=>vent.cliente)
+    ventas!:Ventas[]
+
+
+
 
     @Column({ type: 'varchar', length: 20, nullable: true, unique: true })
     numero_documento!:string

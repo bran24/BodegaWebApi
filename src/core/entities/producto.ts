@@ -13,6 +13,7 @@ import {
 import { Unidad } from "./unidad";
 import { Categoria } from "./categoria";
 import { Proveedor } from "./proveedor";
+import { DetalleVenta } from "./detalleVenta";
 
 
 @Entity({ name: 'producto' })
@@ -57,6 +58,10 @@ export class Producto {
     @Column()
     @UpdateDateColumn()
     fecha_actualizacion!: Date;
+
+    @OneToMany(()=>DetalleVenta,(dv)=>dv.venta)
+    productoVentas!:DetalleVenta[]
+    
 
 
 

@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 
 import { Roles } from "./roles"
+import { Ventas } from "./venta";
 
 
 @Entity({ name: 'usuario' })
@@ -40,6 +41,10 @@ export class Usuario {
     @ManyToOne(() => Roles, (rol) => rol.usuarios)
     @JoinColumn({ name: 'rolid' })
     rol!: Roles;
+
+    @OneToMany(()=> Ventas,(vent)=>vent.usuario)
+    ventas!:Ventas[];
+
 
 
 

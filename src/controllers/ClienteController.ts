@@ -5,7 +5,7 @@ import { AppDataSource } from '../index'
 
 import {Cliente} from "../core/entities/clientes"
 import { createClienteInteractor, deleteClienteInteractor, updateClienteInteractor, } from '../core/interactor/cliente';
-import { TipoDocumento } from '../core/entities/tipo_documento';
+import { TipoDocumento } from '../core/entities/tipoDocumento';
 
 
 export const createCliente = async (req: Request, res: Response): Promise<Response> => {
