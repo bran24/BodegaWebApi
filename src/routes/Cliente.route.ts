@@ -26,4 +26,6 @@ router.delete("/cliente/:id", [validateToken],
 
 router.get('/clientepag', [validateToken], ClienteController.getPaginatedCliente);
 
+router.get("/clientefiltro",[validateToken],ClienteController.BuscarClienteFiltro)
+
 export default router

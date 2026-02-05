@@ -1,5 +1,5 @@
 import { Entity, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToOne, JoinColumn, PrimaryGeneratedColumn, OneToMany } from "typeorm";
-import { Ventas } from "./venta";
+import { Ventas } from "./ventas";
 import { Pago } from "./pago";
 
 
@@ -14,8 +14,24 @@ export class MetodoPago
     descripcion!:string
     @OneToMany(() => Pago, (pago) => pago.metodoPago)
     pagos!: Pago[];
-    @OneToMany(() => Ventas, (ven) => ven.metodoPago)
-    ventas!: Ventas[];
+
+
+    
+    @Column()
+    @CreateDateColumn()
+    fecha_creacion!: Date;
+    @Column()
+    @UpdateDateColumn()
+    fecha_actualizacion!: Date;
+
+
+    @Column({ default: true })
+    isActive!: boolean;
+    
+
+
+
+
     
 
 

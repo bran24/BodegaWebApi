@@ -3,25 +3,25 @@ import { Response, Request } from 'express'
 
 import { AppDataSource } from '../index'
 
-import {Proveedor} from "../core/entities/proveedor"
+import { Proveedor } from "../core/entities/proveedor"
 import { createProveedorInteractor, deleteProveedorInteractor, updateProveedorInteractor } from '../core/interactor/proveedor';
 
 
 export const createProveedor = async (req: Request, res: Response): Promise<Response> => {
 
     try {
-        const { nombre, descripcion,contacto,  email, telefono, direccion, pais } = req.body
+        const { nombre, descripcion, contacto, email, telefono, direccion, pais } = req.body
 
-  
 
-       
+
+
 
         const prov = new Proveedor();
         prov.nombre = nombre;
-        prov.descripcion= descripcion;
+        prov.descripcion = descripcion;
         prov.contacto = contacto;
         prov.email = email;
-        prov.telefono= telefono;
+        prov.telefono = telefono;
         prov.direccion = direccion;
         prov.pais = pais;
         const result = await createProveedorInteractor(prov);
@@ -71,10 +71,10 @@ export const listProveedor = async (req: Request, res: Response): Promise<Respon
 export const updateProveedor = async (req: Request, res: Response): Promise<Response> => {
 
     try {
-        const { id,nombre, descripcion,contacto,  email, telefono, direccion, pais } = req.body
+        const { id, nombre, descripcion, contacto, email, telefono, direccion, pais } = req.body
 
 
-     
+
 
 
 
@@ -84,7 +84,7 @@ export const updateProveedor = async (req: Request, res: Response): Promise<Resp
         prov.descripcion = descripcion;
         prov.contacto = contacto;
         prov.email = email;
-        prov.telefono= telefono;
+        prov.telefono = telefono;
         prov.direccion = direccion;
         prov.pais = pais;
 
@@ -130,7 +130,7 @@ export const searchProveedor = async (req: Request, res: Response): Promise<Resp
 export const deleteProveedor = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.params
 
-    const prov= await AppDataSource.getRepository(Proveedor).findOneBy({ id: +id })
+    const prov = await AppDataSource.getRepository(Proveedor).findOneBy({ id: +id })
 
     if (!prov) {
         return res.status(500).json({ message: "producto no encontrado" })
@@ -152,19 +152,42 @@ export const getPaginatedProveedor = async (req: Request, res: Response) => {
         // Obtener los parámetros de la página y el límite desde la query string
         const page = parseInt(req.query.page as string) || 1;  // Página actual
         const limit = parseInt(req.query.limit as string) || 10;  // Elementos por página
-
+        const query = req.query.query as string;
+        const all = req.query.all || "false";
         // Calcular cuántos elementos saltar (offset) basado en la página
         const offset = (page - 1) * limit;
 
         // Repositorio de productos
         const provRepository = AppDataSource.getRepository(Proveedor)
 
-        // Obtener los productos con paginación
-        const [proveedores, totalItems] = await provRepository.findAndCount({
-            where: { isActive: true }, // Filtrar solo productos activos
-            skip: offset,
-            take: limit,
-        });
+        const qb = provRepository.createQueryBuilder("p")
+            .where("p.isActive = :isActive", { isActive: true })
+
+
+        if (query && query !== "undefined") {
+            qb.andWhere("p.nombre LIKE :query", { query: `%${query}%` })
+        }
+
+
+
+
+
+        if (all === "true") {
+            qb.orderBy("p.id", "ASC")
+        }
+        else {
+
+            qb.orderBy("p.id", "ASC")
+                .skip(offset)
+                .take(limit)
+        }
+
+        const [proveedores, totalItems] = await qb.getManyAndCount();
+
+
+
+
+
 
         // Calcular el número total de páginas
         const totalPages = Math.ceil(totalItems / limit);

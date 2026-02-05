@@ -1,5 +1,5 @@
 import { Entity, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToOne, JoinColumn, PrimaryGeneratedColumn } from "typeorm";
-import { Ventas } from "./venta";
+import { Ventas } from "./ventas";
 import { Usuario } from "./user";
 import { Producto } from "./producto";
 @Entity({ name: 'detalle_venta' })

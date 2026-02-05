@@ -10,7 +10,7 @@ import {
 } from "typeorm";
 
 import { Roles } from "./roles"
-import { Ventas } from "./venta";
+import { Ventas } from "./ventas";
 
 
 @Entity({ name: 'usuario' })

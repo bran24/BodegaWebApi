@@ -3,7 +3,7 @@ import { Response, Request } from 'express'
 
 import { AppDataSource } from '../index'
 
-import {Cliente} from "../core/entities/clientes"
+import { Cliente } from "../core/entities/clientes"
 import { createClienteInteractor, deleteClienteInteractor, updateClienteInteractor, } from '../core/interactor/cliente';
 import { TipoDocumento } from '../core/entities/tipoDocumento';
 
@@ -11,35 +11,25 @@ import { TipoDocumento } from '../core/entities/tipoDocumento';
 export const createCliente = async (req: Request, res: Response): Promise<Response> => {
 
     try {
-        const { nombre, tipo_documento,numero_documento,direccion ,correo,telefono, es_empresa } = req.body
+        const { nombre, tipo_documento, numero_documento, direccion, correo, telefono, es_empresa } = req.body
 
 
-        const tipodoc = await AppDataSource.getRepository(TipoDocumento).findOne({where:{id :tipo_documento}})
+        const tipodoc = await AppDataSource.getRepository(TipoDocumento).findOne({ where: { id: tipo_documento } })
 
-
-        
-
-            
-
-
-
-
-    
-        
         const clie = new Cliente();
         clie.nombre = nombre;
-        clie.tipo_documento=tipodoc ?? null;
+        clie.tipo_documento = tipodoc ?? null;
         clie.numero_documento = numero_documento ?? null;
-        clie.direccion =direccion ?? null;
-        clie.correo =correo ?? null;
-        clie.telefono= telefono ?? null;;
+        clie.direccion = direccion ?? null;
+        clie.correo = correo ?? null;
+        clie.telefono = telefono ?? null;;
         clie.es_empresa = es_empresa ?? false;
 
 
         const clicorr = await AppDataSource.getRepository(Cliente).findOne({
-                where: { correo : correo, isActive: true }
-      
-            });
+            where: { correo: correo, isActive: true }
+
+        });
 
         if (clicorr) {
             return res.status(400).json({ message: "correo ya registrado" })
@@ -47,31 +37,29 @@ export const createCliente = async (req: Request, res: Response): Promise<Respon
         }
 
 
-        if (tipo_documento && numero_documento)
-                {
-                   const clidoc = await AppDataSource.getRepository(Cliente).findOne({
-                        where:{numero_documento,tipo_documento:{id: tipo_documento} },
-                        relations:['tipo_documento']
+        if (tipo_documento && numero_documento) {
+            const clidoc = await AppDataSource.getRepository(Cliente).findOne({
+                where: { numero_documento, tipo_documento: { id: tipo_documento } },
+                relations: ['tipo_documento']
 
 
-                    })
+            })
 
 
 
 
-                    if (clidoc)
-                    {
-                        return res.status(400).json({message:"Número de documento ya registrado"});
+            if (clidoc) {
+                return res.status(400).json({ message: "Número de documento ya registrado" });
 
-                    }
-                }
+            }
+        }
 
-               
-   
-       
+
+
+
 
         const result = await createClienteInteractor(clie);
-     
+
 
         return res.json({ result: result });
     }
@@ -81,13 +69,13 @@ export const createCliente = async (req: Request, res: Response): Promise<Respon
 
 
 
-}
+};
 
-export const listTipoDoc = async (req:Request,res:Response) :Promise<Response>=>{
+export const listTipoDoc = async (req: Request, res: Response): Promise<Response> => {
 
-    try{
+    try {
 
-         const prop = await AppDataSource.getRepository(TipoDocumento).find({
+        const prop = await AppDataSource.getRepository(TipoDocumento).find({
             where: {
                 isActive: true
             }
@@ -102,17 +90,14 @@ export const listTipoDoc = async (req:Request,res:Response) :Promise<Response>=>
 
     }
 
-    catch (error: any){
+    catch (error: any) {
 
         return res.status(500).json({ message: error.message ?? error })
 
     }
 
 
-}
-
-
-
+};
 
 
 
@@ -138,81 +123,76 @@ export const listCliente = async (req: Request, res: Response): Promise<Response
     }
 
 
-}
+};
 
 
 
 export const updateCliente = async (req: Request, res: Response): Promise<Response> => {
 
     try {
-        const { id,nombre, tipo_documento,numero_documento,direccion ,correo,telefono, es_empresa } = req.body
-        
-        const tipodoc = await AppDataSource.getRepository(TipoDocumento).findOne({where:{id :tipo_documento}})
+        const { id, nombre, tipo_documento, numero_documento, direccion, correo, telefono, es_empresa } = req.body
 
-        const clieact = await AppDataSource.getRepository(Cliente).findOne({where:{id:id}})
+        const tipodoc = await AppDataSource.getRepository(TipoDocumento).findOne({ where: { id: tipo_documento } })
 
-        if  (!clieact)
-        {
-            return res.status(400).json({message:"cliente no existe"})
+        const clieact = await AppDataSource.getRepository(Cliente).findOne({ where: { id: id } })
+
+        if (!clieact) {
+            return res.status(400).json({ message: "cliente no existe" })
         }
 
 
-        if ( correo && clieact?.correo !== correo)
-        {
+        if (correo && clieact?.correo !== correo) {
 
-            
-        const clicorr = await AppDataSource.getRepository(Cliente).findOne({
-                where: { correo : correo, isActive: true }
-      
+
+            const clicorr = await AppDataSource.getRepository(Cliente).findOne({
+                where: { correo: correo, isActive: true }
+
             });
 
-        if (clicorr && clicorr.id !== clieact.id ) {
-            return res.status(400).json({ message: "correo ya registrado" })
-
-        }
-
-
-        }
-
-        if ((clieact.numero_documento != numero_documento)  || (clieact.tipo_documento?.id !== tipo_documento))
-            {
-
-                     if (tipo_documento && numero_documento)
-                {
-                   const clidoc = await AppDataSource.getRepository(Cliente).findOne({
-                        where:{numero_documento,tipo_documento:{id: tipo_documento},  isActive: true },
-                        relations:['tipo_documento'],
-
-
-
-                    })
-
-
-
-
-                    if (clidoc  && clidoc.id !== clieact.id)
-                    {
-                        return res.status(400).json({message:" Número de documento ya registrado"});
-
-                    }
-                }
-
+            if (clicorr && clicorr.id !== clieact.id) {
+                return res.status(400).json({ message: "correo ya registrado" })
 
             }
-        
 
-        
+
+        }
+
+        if ((clieact.numero_documento != numero_documento) || (clieact.tipo_documento?.id !== tipo_documento)) {
+
+            if (tipo_documento && numero_documento) {
+                const clidoc = await AppDataSource.getRepository(Cliente).findOne({
+                    where: { numero_documento, tipo_documento: { id: tipo_documento }, isActive: true },
+                    relations: ['tipo_documento'],
+
+
+
+                })
+
+
+
+
+                if (clidoc && clidoc.id !== clieact.id) {
+                    return res.status(400).json({ message: " Número de documento ya registrado" });
+
+                }
+            }
+
+
+        }
+
+
+
 
 
         const clie = new Cliente()
         clie.id = id;
         clie.nombre = nombre;
-        clie.tipo_documento=tipodoc ?? null;
+        clie.tipo_documento = tipodoc ?? null;
         clie.numero_documento = numero_documento ?? null;
-        clie.direccion =direccion  ?? null;
-        clie.correo =correo  ?? null;
-        clie.telefono= telefono ?? null;
-        clie.es_empresa = es_empresa  ?? false;
+        clie.direccion = direccion ?? null;
+        clie.correo = correo ?? null;
+        clie.telefono = telefono ?? null;
+        clie.es_empresa = es_empresa ?? false;
 
 
 
@@ -232,7 +212,7 @@ export const updateCliente = async (req: Request, res: Response): Promise<Respon
 
 
 
-}
+};
 
 
 export const searchCliente = async (req: Request, res: Response): Promise<Response> => {
@@ -255,11 +235,12 @@ export const searchCliente = async (req: Request, res: Response): Promise<Respon
         return res.status(500).json({ message: error.message ?? error })
     }
 
-}
+};
+
 export const deleteCliente = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.params
 
-    const clie= await AppDataSource.getRepository(Cliente).findOneBy({ id: +id })
+    const clie = await AppDataSource.getRepository(Cliente).findOneBy({ id: +id })
 
     if (!clie) {
         return res.status(500).json({ message: "cliente no encontrado" })
@@ -273,7 +254,7 @@ export const deleteCliente = async (req: Request, res: Response): Promise<Respon
     return res.json({ message: `Cliente con id ${id} eliminado` });
 
 
-}
+};
 
 
 export const getPaginatedCliente = async (req: Request, res: Response) => {
@@ -281,20 +262,39 @@ export const getPaginatedCliente = async (req: Request, res: Response) => {
         // Obtener los parámetros de la página y el límite desde la query string
         const page = parseInt(req.query.page as string) || 1;  // Página actual
         const limit = parseInt(req.query.limit as string) || 10;  // Elementos por página
-
+        const { query } = req.query as { query: string };
         // Calcular cuántos elementos saltar (offset) basado en la página
         const offset = (page - 1) * limit;
+        const all = req.query.all || "false";
 
-        // Repositorio de productos
-        const clieRepository = AppDataSource.getRepository(Cliente)
 
-        // Obtener los productos con paginación
-        const [clientes, totalItems] = await clieRepository.findAndCount({
-            where: { isActive: true },
-            relations:['tipo_documento'], 
-            skip: offset,
-            take: limit,
-        });
+        const cliente = AppDataSource.getRepository(Cliente)
+
+
+        const qb = cliente
+            .createQueryBuilder("c")
+            .leftJoin("c.tipo_documento", "td")
+            .where("c.isActive = true")
+
+        if (query && query !== 'undefined') {
+            qb.andWhere("c.nombre LIKE :q OR c.numero_documento LIKE :q", { q: `%${query}%` })
+        }
+
+        qb
+            .select(["c.id", "c.numero_documento", "c.nombre", "c.direccion", "c.correo", "c.telefono", "c.es_empresa", "td.id", "td.nombre", "td.descripcion"])
+            .orderBy("c.id", "ASC")
+
+        if (all != "true") {
+            qb.skip(offset)
+                .take(limit)
+        }
+
+
+
+        const [clientes, totalItems] = await qb.getManyAndCount();
+
+
+
 
         // Calcular el número total de páginas
         const totalPages = Math.ceil(totalItems / limit);
@@ -304,10 +304,36 @@ export const getPaginatedCliente = async (req: Request, res: Response) => {
             clientes,
             totalItems,
             totalPages,
-            currentPage: page,
+            currentPPOage: page,
         });
     } catch (error) {
         console.error('Error al obtener los clientees paginados:', error);
         return res.status(500).json({ message: 'Error al obtener clientees' });
     }
 };
+
+
+export const BuscarClienteFiltro = async (req: Request, res: Response) => {
+    try {
+
+        const { query } = req.query as { query: string };
+        const clientes = await AppDataSource.getRepository(Cliente)
+            .createQueryBuilder("c")
+            .where("c.nombre LIKE :q OR c.numero_documento LIKE :q", { q: `%${query}%` })
+            .andWhere("c.isActive = true")
+            .select(["c.id", "c.numero_documento", "c.nombre","c.correo"])
+            .limit(20)
+            .getMany();
+        return res.json({ result: clientes })
+
+    }
+    catch (error) {
+        console.error('Error al buscar clientes', error)
+        return res.status(500).json({ message: 'Error al buscar cliente por filtro' })
+
+    }
+
+
+
+};
+

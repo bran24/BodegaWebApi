@@ -10,3 +10,6 @@ export const DB_PORT = +(process.env.DB_PORT || "3306");
 export const SALT = +(process.env.SALT ?? 11);
 export const SECRET_TOKEN = process.env.SECRET_TOKEN || "secret";
 export const TOKEN_LIMIT = Number(process.env.TOKEN_LIMIT ?? "1");
+export const ACCESS_TOKEN_MERCADOPAGO = process.env.ACCESS_TOKEN_MERCADOPAGO
+export const PAGE_PAYMENT_STATUS = process.env.PAGE_PAYMENT_STATUS  || "";
+export const NOTIFI_URL = process.env.NOTIFI_URL  || "";

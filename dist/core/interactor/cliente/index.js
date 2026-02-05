@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.findClienteInteractor = exports.deleteClienteInteractor = exports.updateClienteInteractor = exports.createClienteInteractor = void 0;
+const cliente_interactor_1 = require("./cliente.interactor");
+const cliente_datasource_1 = require("../../datasource/cliente.datasource");
+const clienteRepository = new cliente_datasource_1.ClienteTypeOrm();
+exports.createClienteInteractor = (0, cliente_interactor_1.createCliente)(clienteRepository);
+exports.updateClienteInteractor = (0, cliente_interactor_1.updateCliente)(clienteRepository);
+exports.deleteClienteInteractor = (0, cliente_interactor_1.deleteCliente)(clienteRepository);
+exports.findClienteInteractor = (0, cliente_interactor_1.findCliente)(clienteRepository);

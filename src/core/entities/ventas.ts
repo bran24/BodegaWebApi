@@ -21,13 +21,17 @@ export class Ventas {
     @Column()
     fecha_venta!: Date;
 
-    @Column({ type: 'varchar', length: 10 })
-    serie!: string
-    @Column()
+
+    @Column({nullable:true,type: 'datetime'})
+    fecha_facturacion!:Date 
+
+    @Column({ type: 'varchar', length: 10, nullable:true })
+    serie!: string 
+    @Column({nullable:true })
     numero!: number
 
     @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-    subtotal!: number
+    subtotal!: number 
 
     @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
     igv !: number
@@ -45,14 +49,10 @@ export class Ventas {
     @Column({ default: true })
     isActive!: boolean;
 
-    @ManyToOne(() => TipoComprobante,(tc)=>tc.ventas)
+    @ManyToOne(() => TipoComprobante,(tc)=>tc.ventas,{nullable:true})
     @JoinColumn({ name: 'tipoComprobanteid' })
-    tipo_comprobanteid!: TipoComprobante;
+    tipo_comprobante!: TipoComprobante ; 
 
-    
-    @ManyToOne(()=>MetodoPago,(met)=>met.ventas )
-    @JoinColumn({ name: 'metodoPagoid' })
-    metodoPago!: MetodoPago
    
 
 
@@ -63,9 +63,6 @@ export class Ventas {
     
     @OneToMany(()=>Pago,(p)=>p.venta)
     pagos!:Pago[]
-
-
-
 
 
     

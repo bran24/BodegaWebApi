@@ -1,5 +1,5 @@
 import { Entity, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToOne, JoinColumn, PrimaryGeneratedColumn, OneToMany } from "typeorm";
-import { Ventas } from "./venta";
+import { Ventas } from "./ventas";
 
 
 
@@ -20,7 +20,7 @@ export class TipoComprobante {
     @Column({ nullable: true })
     descripcion?: string;
 
-    @OneToMany(() => Ventas, (venta) => venta.tipo_comprobanteid)
+    @OneToMany(() => Ventas, (venta) => venta.tipo_comprobante)
     ventas!: Ventas[];
 
     @Column({ default: true })

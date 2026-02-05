@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.findUsuarioInteractor = exports.deleteUsuarioInteractor = exports.updateUsuarioInteractor = exports.createUsuarioInteractor = void 0;
+const usuario_interactor_1 = require("./usuario.interactor");
+const usuario_datasource_1 = require("../../datasource/usuario.datasource");
+const usuarioRepository = new usuario_datasource_1.UsuarioTypeOrm();
+exports.createUsuarioInteractor = (0, usuario_interactor_1.createUsuario)(usuarioRepository);
+exports.updateUsuarioInteractor = (0, usuario_interactor_1.updateUsuario)(usuarioRepository);
+exports.deleteUsuarioInteractor = (0, usuario_interactor_1.deleteUsuario)(usuarioRepository);
+exports.findUsuarioInteractor = (0, usuario_interactor_1.findUsuario)(usuarioRepository);

@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.findPermisosInteractor = exports.deletePermisosInteractor = exports.updatePermisosInteractor = exports.createPermisosInteractor = void 0;
+const permisos_interactor_1 = require("./permisos.interactor");
+const permisos_datasource_1 = require("../../datasource/permisos.datasource");
+const PermisosRepository = new permisos_datasource_1.PermisosTypeOrm();
+exports.createPermisosInteractor = (0, permisos_interactor_1.createPermisos)(PermisosRepository);
+exports.updatePermisosInteractor = (0, permisos_interactor_1.updatePermisos)(PermisosRepository);
+exports.deletePermisosInteractor = (0, permisos_interactor_1.deletePermisos)(PermisosRepository);
+exports.findPermisosInteractor = (0, permisos_interactor_1.findPermisos)(PermisosRepository);

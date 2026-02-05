@@ -1,5 +1,5 @@
 import { Entity, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToOne, JoinColumn, PrimaryGeneratedColumn, OneToMany } from "typeorm";
-import { Ventas } from "./venta";
+import { Ventas } from "./ventas";
 import { MetodoPago } from "./metodoPago";
 @Entity({ name: 'pago' })
 export class Pago {
@@ -18,14 +18,26 @@ export class Pago {
     @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
     monto!: number
 
+    @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+    vuelto!: number
 
-    @ManyToOne(()=>MetodoPago,(met)=>met.pagos)
-    @JoinColumn({ name: 'metodoPagoid' })
-    metodoPago!: MetodoPago
+
+    @ManyToOne(()=>MetodoPago,(met)=>met.pagos,{nullable: true})
+    @JoinColumn({ name: 'metodoPagoid', })
+    metodoPago!: MetodoPago | null;
+
+
+
 
 
     @Column({ type: 'varchar', length: 30, nullable:true })
     observacion!: string
+
+
+    
+
+    @Column({ type: 'int', nullable:true })
+    idMercadoPago!: number | null
 
 
 

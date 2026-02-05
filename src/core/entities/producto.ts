@@ -14,6 +14,7 @@ import { Unidad } from "./unidad";
 import { Categoria } from "./categoria";
 import { Proveedor } from "./proveedor";
 import { DetalleVenta } from "./detalleVenta";
+import { MovimientoInventario } from "./movimientoInventario";
 
 
 @Entity({ name: 'producto' })
@@ -22,6 +23,11 @@ export class Producto {
     id!: number;
     @Column()
     nombre!: string
+    @Column({ unique: true })
+    sku!: string; // Ej: "PROD-00001" o "BEB-00001"
+    // Código de barras (OPCIONAL, solo si el producto lo tiene)
+    @Column({ unique: true, nullable: true, length: 20 })
+    codigoBarras!: string; // Ej: "7750182003568"
     @Column({ nullable: true })
     descripcion!: string
 
@@ -46,6 +52,10 @@ export class Producto {
 
     @Column()
     cantidad!: number
+
+    @Column({ default: false })
+    afecta_igv!: boolean;
+
     @Column({ default: true })
     isActive!: boolean;
     @Column({ nullable: true })
@@ -59,9 +69,12 @@ export class Producto {
     @UpdateDateColumn()
     fecha_actualizacion!: Date;
 
-    @OneToMany(()=>DetalleVenta,(dv)=>dv.venta)
-    productoVentas!:DetalleVenta[]
-    
+    @OneToMany(() => DetalleVenta, (dv) => dv.venta)
+    productoVentas!: DetalleVenta[]
+
+    @OneToMany(() => MovimientoInventario, (mov) => mov.producto)
+    movimientos!: MovimientoInventario[];
+
 
 
 

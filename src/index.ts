@@ -42,7 +42,7 @@ export const AppDataSource = new DataSource({
     //     trustServerCertificate: true
     // },
 
-    entities: [entities.TipoDocumento,entities.Cliente,entities.Producto, entities.Permisos, entities.Roles, entities.Usuario, entities.Unidad, entities.Categoria, entities.RolPermiso, entities.TipoPermisos, entities.Proveedor,entities.MetodoPago,entities.TipoComprobante,entities.Ventas,entities.DetalleVenta,entities.Pago],
+    entities: [entities.TipoDocumento,entities.Cliente,entities.Producto, entities.Permisos, entities.Roles, entities.Usuario, entities.Unidad, entities.Categoria, entities.RolPermiso, entities.TipoPermisos, entities.Proveedor,entities.MetodoPago,entities.TipoComprobante,entities.Ventas,entities.DetalleVenta,entities.Pago,entities.MovimientoInventario],
     logging: false,
 
 

@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.findRolesInteractor = exports.deleteRolesInteractor = exports.updateRolesInteractor = exports.createRolesInteractor = void 0;
+const roles_interactor_1 = require("./roles.interactor");
+const roles_datasource_1 = require("../../datasource/roles.datasource");
+const RolesRepository = new roles_datasource_1.RolesTypeOrm();
+exports.createRolesInteractor = (0, roles_interactor_1.createRoles)(RolesRepository);
+exports.updateRolesInteractor = (0, roles_interactor_1.updateRoles)(RolesRepository);
+exports.deleteRolesInteractor = (0, roles_interactor_1.deleteRoles)(RolesRepository);
+exports.findRolesInteractor = (0, roles_interactor_1.findRoles)(RolesRepository);

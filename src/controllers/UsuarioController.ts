@@ -200,21 +200,40 @@ export const getPaginatedUser = async (req: Request, res: Response) => {
         // Obtener los parámetros de la página y el límite desde la query string
         const page = parseInt(req.query.page as string) || 1;  // Página actual
         const limit = parseInt(req.query.limit as string) || 10;  // Elementos por página
-
+        const query = req.query.query as string;
+        const all = req.query.all || "false";
         // Calcular cuántos elementos saltar (offset) basado en la página
         const offset = (page - 1) * limit;
 
+        console.log(query)
         // Repositorio de productos
         const usuarioRepository = AppDataSource.getRepository(Usuario)
 
-        // Obtener los productos con paginación
-        const [usuarios, totalItems] = await usuarioRepository.findAndCount({
-            where: { isActive: true },
-            relations: ['rol'],
-            skip: offset,
-            take: limit,
-            select: ['id', 'username', 'email', 'rol', 'password'], // Especifica solo los campos que deseas devolver
-        });
+        const qb = usuarioRepository.createQueryBuilder("u")
+            .where("u.isActive = :isActive", { isActive: true })
+
+        if (query && query !== "undefined") {
+            qb.andWhere("u.username LIKE :query", { query: `%${query}%` })
+        }
+        qb.leftJoinAndSelect("u.rol", "rol")
+
+        qb.select(['u.id', 'u.username', 'u.email', 'rol.id', 'rol.nombre', 'u.password'])
+
+        if (all === "true") {
+            qb.orderBy("u.id", "ASC")
+        }
+        else {
+
+            qb.orderBy("u.id", "ASC")
+                .skip(offset)
+                .take(limit)
+
+        }
+
+
+
+
+        const [usuarios, totalItems] = await qb.getManyAndCount();
 
         // Calcular el número total de páginas
         const totalPages = Math.ceil(totalItems / limit);

@@ -10,7 +10,7 @@ import {
 
 } from "typeorm";
 import { TipoDocumento } from "./tipoDocumento";
-import { Ventas } from "./venta";
+import { Ventas } from "./ventas";
 
 
 

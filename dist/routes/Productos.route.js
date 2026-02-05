@@ -22,13 +22,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const token_1 = __importDefault(require("../segurity/token"));
 const ProductodController = __importStar(require("../controllers/ProductoController"));
 const router = (0, express_1.Router)();
-router.get("/productos", ProductodController.listProduct);
-router.post("/productos", ProductodController.createProduct);
-router.delete("/productos", ProductodController.deleteProduct);
-router.get("/productos/:id", ProductodController.searchProduct);
-router.put("/productos/:id", ProductodController.searchProduct);
+router.get("/productos", [token_1.default], ProductodController.listProduct);
+router.post("/productos", [token_1.default], ProductodController.createProduct);
+router.put("/productos", [token_1.default], ProductodController.updateProduct);
+router.get("/productos/:id", [token_1.default], ProductodController.searchProduct);
+router.delete("/productos/:id", [token_1.default], ProductodController.deleteProduct);
+router.get('/productospag', [token_1.default], ProductodController.getPaginatedProducts);
+router.get('/productofiltro', [token_1.default], ProductodController.buscarProductoFiltro);
 exports.default = router;

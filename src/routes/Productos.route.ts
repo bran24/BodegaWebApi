@@ -39,5 +39,9 @@ router.get('/productospag', [validateToken], ProductodController.getPaginatedPro
 
 
 
+router.get('/productofiltro', [validateToken], ProductodController.buscarProductoFiltro);
+
+
+
 
 export default router;
