@@ -8,10 +8,10 @@ export default async (req: Request, res: Response, next: Function) => {
 
 
   const token = auth?.split(' ')[1];
-  console.log(token)
+  
   try {
     const user = await decode(token);
-    console.log(user)
+
     res.locals.user = user;
     return next();
   } catch (error) {

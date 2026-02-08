@@ -46,23 +46,25 @@ export const Auth = async (req: Request, res: Response): Promise<Response> => {
         })
 
         for (var per of rolper) {
-            permisos.push(per.permiso.id)
+            permisos.push(per.permiso.nombre)
 
 
         }
 
-        console.log(permisos)
+       
 
 
         const token = jwt.sign(
             {
 
                 id: login.id,
+                rol:login.rol.nombre,
+                permisos:permisos
 
             },
             SECRET_TOKEN,
             {
-                expiresIn: `${Number(TOKEN_LIMIT) * 32}d`,
+                expiresIn: `${Number(TOKEN_LIMIT)}h`,
             }
 
         )

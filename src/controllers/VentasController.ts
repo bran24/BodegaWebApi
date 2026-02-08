@@ -340,7 +340,7 @@ export const createVentas = async (req: Request, res: Response): Promise<Respons
             message: "Venta registrada correctamente",
             statusPago : statusmercado,
             metodo: metodoPago.nombre,
-            ventaId: venta.id
+            ventaId : venta.id
         })
 
 
@@ -723,11 +723,11 @@ export const getPagFiltroVentas = async (req: Request, res: Response) => {
 
 
         if (all === "true") {
-            qb.orderBy("v.fecha_creacion", "ASC")
+            qb.orderBy("v.fecha_creacion", "DESC")
         }
 
         else {
-            qb.orderBy("v.fecha_creacion", "ASC")
+            qb.orderBy("v.fecha_creacion", "DESC")
                 .skip(offset)
                 .take(limit);
         }

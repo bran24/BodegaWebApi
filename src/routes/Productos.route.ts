@@ -1,45 +1,46 @@
 import { Router } from "express";
 import validateToken from '../segurity/token'
+import checkPermission  from "../segurity/checkPermission";
 
 import * as ProductodController from "../controllers/ProductoController"
 
 const router = Router()
-router.get("/productos", [validateToken],
+router.get("/productos", validateToken,checkPermission("PRODUCTOS_VER"),
 
     ProductodController.listProduct
 )
 
 
-router.post("/productos", [validateToken],
+router.post("/productos", [validateToken],checkPermission("PRODUCTOS_CREAR"),
 
     ProductodController.createProduct
 )
 
-router.put("/productos", [validateToken],
+router.put("/productos", [validateToken],checkPermission("PRODUCTOS_EDITAR"),
 
     ProductodController.updateProduct
 )
 
 
 
-router.get("/productos/:id", [validateToken],
+router.get("/productos/:id", [validateToken],checkPermission("PRODUCTOS_VER"),
 
     ProductodController.searchProduct
 )
 
 
-router.delete("/productos/:id", [validateToken],
+router.delete("/productos/:id", [validateToken],checkPermission("PRODUCTOS_ELIMINAR") ,
 
     ProductodController.deleteProduct
 )
 
 
-router.get('/productospag', [validateToken], ProductodController.getPaginatedProducts);
+router.get('/productospag', [validateToken],checkPermission("PRODUCTOS_VER") ,ProductodController.getPaginatedProducts);
 
 
 
 
-router.get('/productofiltro', [validateToken], ProductodController.buscarProductoFiltro);
+router.get('/productofiltro', [validateToken], checkPermission("PRODUCTOS_VER"),ProductodController.buscarProductoFiltro);
 
 
 
