@@ -23,6 +23,6 @@ router.delete("/proveedor/:id" ,  [validateToken],checkPermission("PROVEEDORES_E
     ProveedorController.deleteProveedor)
 
 
-router.get('/proveedorpag', [validateToken], checkPermission("PROVEEDORES_ver")  ,ProveedorController.getPaginatedProveedor);
+router.get('/proveedorpag', [validateToken], checkPermission("PROVEEDORES_VER")  ,ProveedorController.getPaginatedProveedor);
 
 export default router

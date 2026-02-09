@@ -13,6 +13,8 @@ export  default (permisoRequerido: string) => {
             });
         }
 
+        
+
         // Verificamos si el permiso solicitado está en su lista
         const tienePermiso = user.permisos.includes(permisoRequerido);
 
