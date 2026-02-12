@@ -9,20 +9,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProximoNumero = exports.getPagFiltroVentas = exports.getVentaById = exports.listmetodopago = exports.listcomprobante = exports.listVentas = exports.cambiarEstadoVenta = exports.createVentas = void 0;
+exports.mercadoPagoWebhook = exports.getProximoNumero = exports.getPagFiltroVentas = exports.getVentaById = exports.listmetodopago = exports.listcomprobante = exports.listVentas = exports.cambiarEstadoVenta = exports.createVentas = void 0;
 const index_1 = require("../index");
 const entities_1 = require("../core/entities");
 const class_transformer_1 = require("class-transformer");
 const detalleVenta_dto_1 = require("../core/validators/detalleVenta.dto");
 const class_validator_1 = require("class-validator");
 const movimientoInventario_1 = require("../core/entities/movimientoInventario");
+const mercadopago_1 = require("mercadopago");
+const mercadopago_2 = require("../utils/mercadopago");
+const config_1 = require("../config");
+const typeorm_1 = require("typeorm");
 const createVentas = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e, _f;
     const queryRunner = index_1.AppDataSource.createQueryRunner();
     yield queryRunner.connect();
     yield queryRunner.startTransaction();
     try {
-        const { clienteid, usuarioid, tipo_comprobanteid, metodopagoid, observacion, detalleVentas, pago, facturar } = req.body;
+        const { dataVenta, dataMercadoPago } = req.body;
+        console.log('ss', dataMercadoPago);
+        const { clienteid, usuarioid, tipo_comprobanteid, observacion, detalleVentas, pago, facturar } = dataVenta;
         const cliente = yield queryRunner.manager.findOne(entities_1.Cliente, { where: { id: clienteid } });
         const usuario = yield queryRunner.manager.findOne(entities_1.Usuario, { where: { id: usuarioid } });
         if (!cliente || !usuario) {
@@ -58,13 +64,16 @@ const createVentas = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             }
         }
         total = subtotal + igv;
+        let metodoPago = yield queryRunner.manager.findOne(entities_1.MetodoPago, { where: { id: pago.metodoPagoid } });
+        if (!metodoPago) {
+            return res.status(400).json({ message: "Metodo de pago no existe" });
+        }
         let estado = 'PENDIENTE';
         if (facturar) {
             estado = 'FACTURADO';
         }
         const tipoComprobante = yield queryRunner.manager.findOne(entities_1.TipoComprobante, { where: { id: tipo_comprobanteid } });
-        const metodoPago = yield queryRunner.manager.findOne(entities_1.MetodoPago, { where: { id: metodopagoid } });
-        if (!tipoComprobante || !metodoPago) {
+        if (!tipoComprobante) {
             return res.status(400).json({ message: "Faltan datos válidos para registrar la venta" });
         }
         const ultimaventa = yield queryRunner.manager.findOne(entities_1.Ventas, {
@@ -124,18 +133,85 @@ const createVentas = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         pag.fecha = new Date();
         pag.monto = pago.monto;
         pag.vuelto = pago.vuelto;
-        pag.metodoPago = { id: pago.metodoPagoid };
+        pag.metodoPago = metodoPago;
         pag.observacion = (_c = pago.observacion) !== null && _c !== void 0 ? _c : "";
         yield queryRunner.manager.save(pag);
+        let statusmercado = 'ninguno';
+        if (pago.metodoPagoid == 2 || pago.metodoPagoid == 3) {
+            const payment = new mercadopago_1.Payment(mercadopago_2.mpClient);
+            const body = {
+                transaction_amount: dataMercadoPago.transaction_amount,
+                token: dataMercadoPago.token,
+                description: "Compra en bodega tarjeta",
+                installments: 1,
+                payment_method_id: dataMercadoPago.payment_method_id,
+                issuer_id: dataMercadoPago.issuer_id,
+                payer: {
+                    email: dataMercadoPago.payer.email,
+                    identification: {
+                        type: dataMercadoPago.payer.identification.type,
+                        number: dataMercadoPago.payer.identification.number
+                    }
+                },
+                external_reference: venta.id.toString(),
+                notification_url: config_1.NOTIFI_URL
+            };
+            const pagotarjeta = yield payment.create({ body });
+            statusmercado = (_d = pagotarjeta === null || pagotarjeta === void 0 ? void 0 : pagotarjeta.status) !== null && _d !== void 0 ? _d : 'ninguno';
+            const idmercado = pagotarjeta === null || pagotarjeta === void 0 ? void 0 : pagotarjeta.id;
+            if (statusmercado != 'approved') {
+                yield queryRunner.rollbackTransaction();
+                return res.status(400).json({
+                    message: "Pago no aprobado",
+                    statusPago: statusmercado,
+                    metodo: metodoPago.nombre
+                });
+            }
+            pag.idMercadoPago = Number(idmercado);
+            yield queryRunner.manager.save(pag);
+        }
+        else if (pago.metodoPagoid == 4) {
+            const payment = new mercadopago_1.Payment(mercadopago_2.mpClient);
+            var body = {
+                token: dataMercadoPago.token,
+                transaction_amount: dataMercadoPago.transaction_amount,
+                installments: 1,
+                description: 'Compra en bodega yape',
+                payment_method_id: 'yape',
+                payer: {
+                    email: dataMercadoPago.payer.email,
+                },
+                external_reference: venta.id.toString(),
+                notification_url: config_1.NOTIFI_URL
+            };
+            console.log('body', body);
+            const pagotarjeta = yield payment.create({ body });
+            statusmercado = (_e = pagotarjeta === null || pagotarjeta === void 0 ? void 0 : pagotarjeta.status) !== null && _e !== void 0 ? _e : 'ninguno';
+            const idmercado = pagotarjeta === null || pagotarjeta === void 0 ? void 0 : pagotarjeta.id;
+            pag.idMercadoPago = Number(idmercado);
+            yield queryRunner.manager.save(pag);
+            if (statusmercado != 'approved') {
+                yield queryRunner.rollbackTransaction();
+                return res.status(400).json({
+                    message: "Pago no aprobado",
+                    statusPago: statusmercado,
+                    metodo: metodoPago.nombre
+                });
+            }
+        }
         yield queryRunner.commitTransaction();
         return res.status(201).json({
-            message: "Venta registrada correctamente"
+            message: "Venta registrada correctamente",
+            statusPago: statusmercado,
+            metodo: metodoPago.nombre,
+            ventaId: venta.id
         });
     }
     catch (error) {
         yield queryRunner.rollbackTransaction();
+        console.error(error.message);
         return res.status(500).json({
-            message: (_d = error.message) !== null && _d !== void 0 ? _d : "Error al registrar la venta",
+            message: (_f = error.message) !== null && _f !== void 0 ? _f : "Error al registrar la venta",
         });
     }
     finally {
@@ -144,7 +220,7 @@ const createVentas = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.createVentas = createVentas;
 const cambiarEstadoVenta = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _e, _f, _g;
+    var _g, _h, _j;
     const queryRunner = index_1.AppDataSource.createQueryRunner();
     yield queryRunner.connect();
     yield queryRunner.startTransaction();
@@ -191,7 +267,7 @@ const cambiarEstadoVenta = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 mov.producto = prod;
                 mov.tipo = movimientoInventario_1.TipoMovimiento.ENTRADA;
                 mov.cantidad = det.cantidad;
-                mov.referencia = `Anulación venta ${(_e = venta.serie) !== null && _e !== void 0 ? _e : ""}-${(_f = venta.numero) !== null && _f !== void 0 ? _f : ""}`;
+                mov.referencia = `Anulación venta ${(_g = venta.serie) !== null && _g !== void 0 ? _g : ""}-${(_h = venta.numero) !== null && _h !== void 0 ? _h : ""}`;
                 yield queryRunner.manager.save(mov);
             }
             venta.estado = "ANULADO";
@@ -208,7 +284,7 @@ const cambiarEstadoVenta = (req, res) => __awaiter(void 0, void 0, void 0, funct
     catch (error) {
         yield queryRunner.rollbackTransaction();
         return res.status(500).json({
-            message: (_g = error.message) !== null && _g !== void 0 ? _g : "Error al registrar la venta",
+            message: (_j = error.message) !== null && _j !== void 0 ? _j : "Error al registrar la venta",
         });
     }
     finally {
@@ -217,7 +293,7 @@ const cambiarEstadoVenta = (req, res) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.cambiarEstadoVenta = cambiarEstadoVenta;
 const listVentas = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _h;
+    var _k;
     try {
         const ventas = yield index_1.AppDataSource.getRepository(entities_1.Ventas).find({
             where: {
@@ -236,12 +312,12 @@ const listVentas = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         return res.json({ result: ventas });
     }
     catch (error) {
-        return res.status(500).json({ message: (_h = error.message) !== null && _h !== void 0 ? _h : error });
+        return res.status(500).json({ message: (_k = error.message) !== null && _k !== void 0 ? _k : error });
     }
 });
 exports.listVentas = listVentas;
 const listcomprobante = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _j;
+    var _l;
     try {
         const comprobantes = yield index_1.AppDataSource.getRepository(entities_1.TipoComprobante).find({
             where: {
@@ -254,12 +330,12 @@ const listcomprobante = (req, res) => __awaiter(void 0, void 0, void 0, function
         return res.json({ result: comprobantes });
     }
     catch (error) {
-        return res.status(500).json({ message: (_j = error.message) !== null && _j !== void 0 ? _j : error });
+        return res.status(500).json({ message: (_l = error.message) !== null && _l !== void 0 ? _l : error });
     }
 });
 exports.listcomprobante = listcomprobante;
 const listmetodopago = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _k;
+    var _m;
     try {
         const pago = yield index_1.AppDataSource.getRepository(entities_1.MetodoPago).find({
             where: {
@@ -272,12 +348,12 @@ const listmetodopago = (req, res) => __awaiter(void 0, void 0, void 0, function*
         return res.json({ result: pago });
     }
     catch (error) {
-        return res.status(500).json({ message: (_k = error.message) !== null && _k !== void 0 ? _k : error });
+        return res.status(500).json({ message: (_m = error.message) !== null && _m !== void 0 ? _m : error });
     }
 });
 exports.listmetodopago = listmetodopago;
 const getVentaById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _l;
+    var _o;
     try {
         const { id } = req.params;
         const venta = yield index_1.AppDataSource.getRepository(entities_1.Ventas)
@@ -335,7 +411,7 @@ const getVentaById = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         return res.json({ result: venta });
     }
     catch (error) {
-        return res.status(500).json({ message: (_l = error.message) !== null && _l !== void 0 ? _l : error });
+        return res.status(500).json({ message: (_o = error.message) !== null && _o !== void 0 ? _o : error });
     }
 });
 exports.getVentaById = getVentaById;
@@ -380,10 +456,10 @@ const getPagFiltroVentas = (req, res) => __awaiter(void 0, void 0, void 0, funct
             "tc.nombre"
         ]);
         if (all === "true") {
-            qb.orderBy("v.fecha_creacion", "ASC");
+            qb.orderBy("v.fecha_creacion", "DESC");
         }
         else {
-            qb.orderBy("v.fecha_creacion", "ASC")
+            qb.orderBy("v.fecha_creacion", "DESC")
                 .skip(offset)
                 .take(limit);
         }
@@ -402,7 +478,7 @@ const getPagFiltroVentas = (req, res) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.getPagFiltroVentas = getPagFiltroVentas;
 const getProximoNumero = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _m;
+    var _p;
     try {
         const { id } = req.params;
         const tipoComprobante = yield index_1.AppDataSource.getRepository(entities_1.TipoComprobante)
@@ -422,7 +498,76 @@ const getProximoNumero = (req, res) => __awaiter(void 0, void 0, void 0, functio
         });
     }
     catch (error) {
-        return res.status(500).json({ message: (_m = error.message) !== null && _m !== void 0 ? _m : error });
+        return res.status(500).json({ message: (_p = error.message) !== null && _p !== void 0 ? _p : error });
     }
 });
 exports.getProximoNumero = getProximoNumero;
+const mercadoPagoWebhook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _q, _r, _s;
+    const { query, body } = req;
+    const paymentId = query['data.id'] || ((_q = body === null || body === void 0 ? void 0 : body.data) === null || _q === void 0 ? void 0 : _q.id);
+    if (!paymentId || (body.type && body.type !== 'payment')) {
+        return res.sendStatus(200);
+    }
+    const queryRunner = index_1.AppDataSource.createQueryRunner();
+    yield queryRunner.connect();
+    yield queryRunner.startTransaction();
+    try {
+        const payment = new mercadopago_1.Payment(mercadopago_2.mpClient);
+        const data = yield payment.get({ id: Number(paymentId) });
+        const mpMethodId = data.payment_method_id;
+        const mapping = {
+            'yape': 'Yape',
+            'debvisa': 'Tarjeta de Débito',
+            'visa': 'Tarjeta de Crédito',
+            'master': 'Tarjeta de Crédito',
+            'debmaster': 'Tarjeta de Débito'
+        };
+        const nombreBuscado = mapping[mpMethodId] || 'Mercado Pago';
+        let metodoEncontrado = yield queryRunner.manager.findOne(entities_1.MetodoPago, {
+            where: { nombre: (0, typeorm_1.ILike)(`%${nombreBuscado}%`) }
+        });
+        if (data.status === 'approved') {
+            const ventaId = data.external_reference;
+            const venta = yield queryRunner.manager.findOne(entities_1.Ventas, {
+                where: { id: Number(ventaId) },
+                relations: ['detalleVentas', 'detalleVentas.producto']
+            });
+            if (venta && venta.estado !== 'PAGADO' && venta.estado !== 'FACTURADO') {
+                for (const det of venta.detalleVentas) {
+                    const producto = det.producto;
+                    producto.cantidad -= det.cantidad;
+                    yield queryRunner.manager.save(producto);
+                    const mov = new entities_1.MovimientoInventario();
+                    mov.producto = producto;
+                    mov.cantidad = det.cantidad;
+                    mov.referencia = `Venta Digital ${(_r = venta.serie) !== null && _r !== void 0 ? _r : ""}-${(_s = venta.numero) !== null && _s !== void 0 ? _s : ""}`;
+                    mov.tipo = movimientoInventario_1.TipoMovimiento.SALIDA;
+                    yield queryRunner.manager.save(mov);
+                }
+                venta.estado = 'FACTURADO';
+                venta.fecha_facturacion = new Date();
+                yield queryRunner.manager.save(venta);
+                const nuevoPago = new entities_1.Pago();
+                nuevoPago.venta = venta;
+                nuevoPago.fecha = new Date();
+                nuevoPago.monto = data.transaction_amount || 0;
+                nuevoPago.vuelto = 0;
+                nuevoPago.metodoPago = metodoEncontrado;
+                nuevoPago.observacion = `Transacción MP: ${paymentId}`;
+                yield queryRunner.manager.save(nuevoPago);
+            }
+        }
+        yield queryRunner.commitTransaction();
+        return res.sendStatus(200);
+    }
+    catch (error) {
+        yield queryRunner.rollbackTransaction();
+        console.error("Error Webhook:", error);
+        return res.status(500).send("Internal Server Error");
+    }
+    finally {
+        yield queryRunner.release();
+    }
+});
+exports.mercadoPagoWebhook = mercadoPagoWebhook;

@@ -205,7 +205,7 @@ export const getPaginatedUser = async (req: Request, res: Response) => {
         // Calcular cuántos elementos saltar (offset) basado en la página
         const offset = (page - 1) * limit;
 
-        console.log(query)
+       
         // Repositorio de productos
         const usuarioRepository = AppDataSource.getRepository(Usuario)
 

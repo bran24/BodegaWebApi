@@ -38,14 +38,18 @@ __decorate([
     __metadata("design:type", Number)
 ], Pago.prototype, "vuelto", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => metodoPago_1.MetodoPago, (met) => met.pagos),
-    (0, typeorm_1.JoinColumn)({ name: 'metodoPagoid' }),
-    __metadata("design:type", metodoPago_1.MetodoPago)
+    (0, typeorm_1.ManyToOne)(() => metodoPago_1.MetodoPago, (met) => met.pagos, { nullable: true }),
+    (0, typeorm_1.JoinColumn)({ name: 'metodoPagoid', }),
+    __metadata("design:type", Object)
 ], Pago.prototype, "metodoPago", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 30, nullable: true }),
     __metadata("design:type", String)
 ], Pago.prototype, "observacion", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Object)
+], Pago.prototype, "idMercadoPago", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)

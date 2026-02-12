@@ -22,13 +22,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const token_1 = __importDefault(require("../segurity/token"));
 const usController = __importStar(require("../controllers/UsuarioController"));
+const checkPermission_1 = __importDefault(require("../segurity/checkPermission"));
 const router = (0, express_1.Router)();
-router.get("/usuario", usController.getPaginatedUser);
-router.post("/usuario", usController.createUser);
-router.put("/usuario", usController.updateUser);
-router.get("/usuario/:id", usController.searchUser);
-router.delete("/usuario/:id", usController.deleteUser);
+router.get("/usuario", token_1.default, (0, checkPermission_1.default)('USUARIOS_VER'), usController.getPaginatedUser);
+router.post("/usuario", token_1.default, (0, checkPermission_1.default)('USUARIOS_CREAR'), usController.createUser);
+router.put("/usuario", token_1.default, (0, checkPermission_1.default)('USUARIOS_EDITAR'), usController.updateUser);
+router.get("/usuario/:id", token_1.default, (0, checkPermission_1.default)('USUARIOS_VER'), usController.searchUser);
+router.delete("/usuario/:id", token_1.default, (0, checkPermission_1.default)('USUARIOS_ELIMINAR'), usController.deleteUser);
 exports.default = router;

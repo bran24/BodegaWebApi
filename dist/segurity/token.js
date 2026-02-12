@@ -15,10 +15,8 @@ exports.default = (req, res, next) => __awaiter(void 0, void 0, void 0, function
     if (!auth)
         return res.status(401).json({ message: 'No autorizado' });
     const token = auth === null || auth === void 0 ? void 0 : auth.split(' ')[1];
-    console.log(token);
     try {
         const user = yield (0, decodejwt_1.decode)(token);
-        console.log(user);
         res.locals.user = user;
         return next();
     }

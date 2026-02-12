@@ -13,6 +13,7 @@ import {
     DB_PORT,
     DB_SERVER,
     DB_USERNAME,
+    MYSQL_URL
     // TABLEPREFIX,
 } from "./config"
 import helmet from "helmet";
@@ -32,11 +33,12 @@ app.use('/upload', express.static("./upload"))
 
 export const AppDataSource = new DataSource({
     type: "mysql",
-    host: DB_SERVER,
+    ...(MYSQL_URL?{url:MYSQL_URL}:{ host: DB_SERVER,
     port: DB_PORT,
     username: DB_USERNAME,
     password: DB_PASSWORD,
-    database: DB_DATABASE,
+    database: DB_DATABASE}),
+
     migrations: [__dirname + "/core/migrations/*.{ts,js}"],
     // options: {
     //     trustServerCertificate: true
@@ -44,6 +46,8 @@ export const AppDataSource = new DataSource({
 
     entities: [entities.TipoDocumento,entities.Cliente,entities.Producto, entities.Permisos, entities.Roles, entities.Usuario, entities.Unidad, entities.Categoria, entities.RolPermiso, entities.TipoPermisos, entities.Proveedor,entities.MetodoPago,entities.TipoComprobante,entities.Ventas,entities.DetalleVenta,entities.Pago,entities.MovimientoInventario],
     logging: false,
+    synchronize: true,
+    ssl: MYSQL_URL ? { rejectUnauthorized: false } : false
 
 
 })

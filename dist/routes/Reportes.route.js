@@ -28,8 +28,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const token_1 = __importDefault(require("../segurity/token"));
+const checkPermission_1 = __importDefault(require("../segurity/checkPermission"));
 const ReportesController = __importStar(require("../controllers/ReportesController"));
 const router = (0, express_1.Router)();
-router.get('/dashboard', [token_1.default], ReportesController.getDashboardData);
-router.get('/reporte/ingresos', [token_1.default], ReportesController.getReporteIngresos);
+router.get('/dashboard', [token_1.default], (0, checkPermission_1.default)('DASHBOARD_VER'), ReportesController.getDashboardData);
+router.get('/reporte/ingresos', [token_1.default], (0, checkPermission_1.default)('REPORTES_VER'), ReportesController.getReporteIngresos);
 exports.default = router;

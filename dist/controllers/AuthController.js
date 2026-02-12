@@ -46,13 +46,14 @@ const Auth = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             relations: ['rol', 'permiso'],
         });
         for (var per of rolper) {
-            permisos.push(per.permiso.id);
+            permisos.push(per.permiso.nombre);
         }
-        console.log(permisos);
         const token = jsonwebtoken_1.default.sign({
             id: login.id,
+            rol: login.rol.nombre,
+            permisos: permisos
         }, config_1.SECRET_TOKEN, {
-            expiresIn: `${Number(config_1.TOKEN_LIMIT) * 32}d`,
+            expiresIn: `${Number(config_1.TOKEN_LIMIT)}h`,
         });
         return res.json({
             "id": login.id,

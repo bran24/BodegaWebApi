@@ -195,7 +195,7 @@ const BuscarClienteFiltro = (req, res) => __awaiter(void 0, void 0, void 0, func
             .createQueryBuilder("c")
             .where("c.nombre LIKE :q OR c.numero_documento LIKE :q", { q: `%${query}%` })
             .andWhere("c.isActive = true")
-            .select(["c.id", "c.numero_documento", "c.nombre"])
+            .select(["c.id", "c.numero_documento", "c.nombre", "c.correo"])
             .limit(20)
             .getMany();
         return res.json({ result: clientes });

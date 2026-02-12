@@ -32,7 +32,7 @@ router.get('/metodopagos', [validateToken], checkPermission('VENTAS_CREAR'), Ven
 
 router.get('/tipocomprobantes', [validateToken], checkPermission('VENTAS_CREAR'), VentasController.listcomprobante);
 
-router.post("/webhook", [validateToken], checkPermission('VENTAS_CREAR'), VentasController.mercadoPagoWebhook);
+// router.post("/webhook", [validateToken], checkPermission('VENTAS_CREAR'), VentasController.mercadoPagoWebhook);
 
 
 

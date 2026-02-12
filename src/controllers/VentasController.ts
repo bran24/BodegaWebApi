@@ -11,7 +11,6 @@ import { validate, validateOrReject } from 'class-validator';
 import { TipoMovimiento } from '../core/entities/movimientoInventario';
 import { MercadoPagoConfig, Order, Preference, Payment } from "mercadopago"
 import { mpClient } from '../utils/mercadopago';
-import { PAGE_PAYMENT_STATUS, NOTIFI_URL } from '../config'
 import { ILike } from 'typeorm';
 export const createVentas = async (req: Request, res: Response): Promise<Response> => {
 
@@ -256,9 +255,9 @@ export const createVentas = async (req: Request, res: Response): Promise<Respons
                 }
 
             },
-            external_reference: venta.id.toString(),
+            external_reference: venta.id.toString()
 
-            notification_url: NOTIFI_URL
+      
             
         };
 
@@ -302,8 +301,8 @@ export const createVentas = async (req: Request, res: Response): Promise<Respons
             payer: {
                 email:  dataMercadoPago.payer.email,
             },
-            external_reference: venta.id.toString(),
-            notification_url: NOTIFI_URL
+            external_reference: venta.id.toString()
+           
          
             };
 
@@ -792,109 +791,4 @@ export const getProximoNumero = async (req: Request, res: Response) => {
         return res.status(500).json({ message: error.message ?? error });
     }
 };
-
-
-export const mercadoPagoWebhook = async (req: Request, res: Response) => {
-    const { query, body } = req;
-
-   
-
-    // 1. MP envía el ID del pago de dos formas posibles según el evento
-    const paymentId = query['data.id'] || body?.data?.id;
-
-    // Si no hay ID o el tipo no es 'payment', ignoramos
-    if (!paymentId || (body.type && body.type !== 'payment')) {
-        return res.sendStatus(200);
-    }
-
-    const queryRunner = AppDataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-        // 2. Consultar el "Toolkit" (SDK) para obtener la verdad del pago
-        const payment = new Payment(mpClient);
-        const data = await payment.get({ id: Number(paymentId) });
-
-        // El campo exacto que devuelve la API es payment_method_id
-        const mpMethodId = data.payment_method_id;
-
-        const mapping: Record<string, string> = {
-            'yape': 'Yape',
-            'debvisa': 'Tarjeta de Débito',
-            'visa': 'Tarjeta de Crédito',
-            'master': 'Tarjeta de Crédito',
-            'debmaster': 'Tarjeta de Débito'
-
-        };
-
-        // Si el ID de MP no está en tu lista, usamos 'Mercado Pago' como genérico
-        const nombreBuscado = mapping[mpMethodId!] || 'Mercado Pago';
-
-        let metodoEncontrado = await queryRunner.manager.findOne(MetodoPago, {
-            where: { nombre: ILike(`%${nombreBuscado}%`) }
-        });
-
-
-
-        if (data.status === 'approved') {
-            const ventaId = data.external_reference; // El ID que enviaste en createVentas
-
-            // 3. Buscar la venta con sus detalles
-            const venta = await queryRunner.manager.findOne(Ventas, {
-                where: { id: Number(ventaId) },
-                relations: ['detalleVentas', 'detalleVentas.producto']
-            });
-
-            // Evitamos procesar una venta que ya fue pagada (Idempotencia)
-            if (venta && venta.estado !== 'PAGADO' && venta.estado !== 'FACTURADO') {
-
-                // 4. RESTAR STOCK Y CREAR MOVIMIENTOS (Lo que no se hizo en createVentas)
-                for (const det of venta.detalleVentas) {
-                    const producto = det.producto;
-
-                    // Restamos stock físicamente
-                    producto.cantidad -= det.cantidad;
-                    await queryRunner.manager.save(producto);
-
-                    // Registramos el movimiento
-                    const mov = new MovimientoInventario();
-                    mov.producto = producto;
-                    mov.cantidad = det.cantidad;
-                    mov.referencia = `Venta Digital ${venta.serie ?? ""}-${venta.numero ?? ""}`;
-                    mov.tipo = TipoMovimiento.SALIDA;
-                    await queryRunner.manager.save(mov);
-                }
-
-                // 5. Actualizar estado de la venta y asignar fecha de facturación si aplica
-                venta.estado = 'FACTURADO';
-                venta.fecha_facturacion = new Date();
-                await queryRunner.manager.save(venta);
-
-                // 6. Registrar el Pago en tu tabla de Pagos
-                const nuevoPago = new Pago();
-                nuevoPago.venta = venta;
-                nuevoPago.fecha = new Date();
-                nuevoPago.monto = data.transaction_amount || 0;
-                nuevoPago.vuelto = 0;
-                nuevoPago.metodoPago = metodoEncontrado
-                nuevoPago.observacion = `Transacción MP: ${paymentId}`;
-
-                await queryRunner.manager.save(nuevoPago);
-            }
-        }
-
-        await queryRunner.commitTransaction();
-        return res.sendStatus(200); // MP necesita el 200 para dejar de avisar
-
-    } catch (error) {
-        await queryRunner.rollbackTransaction();
-        console.error("Error Webhook:", error);
-        return res.status(500).send("Internal Server Error");
-    } finally {
-        await queryRunner.release();
-    }
-};
-
-
 

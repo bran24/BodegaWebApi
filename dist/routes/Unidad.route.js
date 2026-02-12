@@ -28,11 +28,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const token_1 = __importDefault(require("../segurity/token"));
+const checkPermission_1 = __importDefault(require("../segurity/checkPermission"));
 const UnidadController = __importStar(require("../controllers/UnidadController"));
 const router = (0, express_1.Router)();
-router.get("/unidad", [token_1.default], UnidadController.listUnidad);
-router.post("/unidad", UnidadController.createUnidad);
-router.put("/unidad", UnidadController.updateUnidad);
-router.get("/unidad/:id", UnidadController.searchUnidad);
-router.delete("/unidad/:id", UnidadController.deleteUnidad);
+router.get("/unidad", [token_1.default], (0, checkPermission_1.default)('PRODUCTOS_VER'), UnidadController.listUnidad);
+router.post("/unidad", [token_1.default], (0, checkPermission_1.default)('PRODUCTOS_VER'), UnidadController.createUnidad);
+router.put("/unidad", [token_1.default], (0, checkPermission_1.default)('PRODUCTOS_VER'), UnidadController.updateUnidad);
+router.get("/unidad/:id", [token_1.default], (0, checkPermission_1.default)('PRODUCTOS_VER'), UnidadController.searchUnidad);
+router.delete("/unidad/:id", [token_1.default], (0, checkPermission_1.default)('PRODUCTOS_VER'), UnidadController.deleteUnidad);
 exports.default = router;
